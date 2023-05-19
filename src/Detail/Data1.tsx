@@ -61,12 +61,14 @@ function Data1() {
 
         if(data) {
 
+          //using the first data in query
           const newRocket = data.rockets[0]
 
           return(
             <View style={styles.container}>
               <ImageBackground source={require('../images/detail_background.jpg')} style={styles.imageBackground}>
               <StatusBar barStyle="light-content" />
+
               <View style={styles.cardContainer}>
                 <ScrollView showsVerticalScrollIndicator={false} >
                   
@@ -87,7 +89,7 @@ function Data1() {
                         <Text style={styles.text}>Mass: {newRocket.mass.kg} kilograms{"\n"}</Text>
                         <Text style={styles.text}>Height: {newRocket.height.meters} meters{"\n"}</Text>
                         <Text style={styles.text}>Description: {newRocket.description}{"\n"}</Text>
-                        
+                      
                         <Text style={styles.text}>Wikipedia</Text>
                         <TouchableOpacity onPress={onPressHandler}>
                           <Text style={styles.text}>{newRocket.wikipedia}</Text>
@@ -105,7 +107,7 @@ function Data1() {
             </View>
           )
         }
-        return null
+         return null
   }
 
   const styles = StyleSheet.create({

@@ -56,6 +56,7 @@ function Data4() {
 
         if(data) {
 
+          //using the fourth data in query
           const newRocket = data.rockets[3]
 
           //sending to wiki link
@@ -67,6 +68,7 @@ function Data4() {
             <View style={styles.container}>
               <ImageBackground source={require('../images/detail_background.jpg')} style={styles.imageBackground}>
               <StatusBar barStyle="light-content" />
+
               <View style={styles.cardContainer}>
                 <ScrollView showsVerticalScrollIndicator={false} >
                   
@@ -93,10 +95,11 @@ function Data4() {
                         </TouchableOpacity>
 
                       </View>
+
                     <View style={styles.button}>
                       <Button title='Back Home' onPress={() => navigation.navigate("Home") }/>
                     </View>
-
+                    
                     </View>
                 </ScrollView>
                 </View>

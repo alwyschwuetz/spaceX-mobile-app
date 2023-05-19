@@ -56,6 +56,7 @@ function Data3() {
 
         if(data) {
 
+          //using the third data in query
           const newRocket = data.rockets[2]
 
           //sending to wiki link
@@ -67,6 +68,7 @@ function Data3() {
             <View style={styles.container}>
               <ImageBackground source={require('../images/detail_background.jpg')} style={styles.imageBackground}>
               <StatusBar barStyle="light-content" />
+              
               <View style={styles.cardContainer}>
                 <ScrollView showsVerticalScrollIndicator={false} >
                   

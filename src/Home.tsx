@@ -61,14 +61,14 @@ function Home() {
       setFilterName('Filter')      
     }
 
+    //filter the clicked button
     const selectFilter = (filter: string) => {
       setSelectedFilter(filter)
       setIsOpen(false)
     }
 
+    //search the text from input
     const searchHandler = (text: string) => {
-
-      // setSearch(text)
 
       if (text !== '' && filterName ==='Filter') {
         showToast();
@@ -95,9 +95,7 @@ function Home() {
       setFilteredData(filteredItems)
     }
 
-    console.log(filteredData)
-
-  //Loading state handling
+  //Loading state handler
   if (loading) {
     return (
       <View style={styles.container}>
@@ -105,7 +103,7 @@ function Home() {
       </View>
     )}
   
-  //Error state handling
+  //Error state handler
   if (error) {
     return (
       <View style={styles.container}>
@@ -118,20 +116,17 @@ function Home() {
   //Success state handling
   if (data) {
 
-    const background = require('./images/main_background.png')
-
     return (
       <View style={styles.container}>
-       <ImageBackground source={background} style={styles.imageBackground} >
+       <ImageBackground source={require('./images/main_background.png')} style={styles.imageBackground} >
         
         <StatusBar barStyle="light-content" translucent={true}/>
 
           {/* Search bar */}
           <View style={styles.search}>
-
             <TextInput style={styles.inputContainer} placeholder='Search' onChangeText={text => searchHandler(text)}/>
-
           </View>
+              {/* filter buttons */}
               <View style={styles.filterButton}>
                 <Button title={filterName} onPress={toggleDropdown} />
                 {isOpen && (
@@ -143,7 +138,7 @@ function Home() {
                 </View>
                 )}
               </View>
-
+          
           <ScrollView showsHorizontalScrollIndicator={false} horizontal={true}>
 
             { (filteredData.length > 0 ? filteredData : data.rockets).map((rocket: Rocket) => {
@@ -182,6 +177,7 @@ function Home() {
                     </View>
                   )}
 
+                  {/* all the rocket details */}
                   <View style={styles.cardDetails}>
 
                     <View style={styles.cardContent}>
@@ -204,7 +200,6 @@ function Home() {
           </ImageBackground>
       </View>
   )}
-  //returns null if no condition is met
   return null
 }
 
