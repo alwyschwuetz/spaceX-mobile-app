@@ -3,8 +3,9 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { RootSiblingParent } from 'react-native-root-siblings';
 import Onboarding from 'react-native-onboarding-swiper';
-import { useState } from 'react';
-import { StyleSheet, Image} from 'react-native';
+import { useState, useEffect } from 'react';
+import { StyleSheet, Image, ActivityIndicator} from 'react-native';
+import { Asset } from 'expo-asset';
 import Home from './src/Home';
 import Data1 from './src/Detail/Data1';
 import Data2 from './src/Detail/Data2';
@@ -22,6 +23,20 @@ const Stack = createNativeStackNavigator()
 export default function App() {
   
   const [showOnboarding, setShowOnboarding] = useState(true);
+  const [isImageLoading, setImageLoading] = useState(true);
+  
+  useEffect(() => {
+    const loadImage = async () => {
+      try {
+        await Asset.loadAsync(require('./assets/images/onboarding.jpg'));
+        setImageLoading(false);
+      } catch (error) {
+        console.error('Error loading image:', error);
+      }
+    };
+  
+    loadImage();
+  }, []);
 
   const handleOnboarding = () => {
     setShowOnboarding(false);
@@ -40,7 +55,13 @@ export default function App() {
                 pages={[
                   {
                     backgroundColor: '#6F84C5',
-                    image: <Image source={require('./assets/images/onboarding.jpg')} style={styles.image} />,
+                    image: isImageLoading ? (
+                      <ActivityIndicator size="large" color="white" />
+                    ) : (
+                      <Image
+                        source={require('./assets/images/onboarding.jpg')}
+                        style={styles.image}
+                      />),
                     title: 'SpaceX',
                     subtitle: 'Continue to see all the rockets information',
                     titleStyles: { color: 'black', fontSize: 24 },
