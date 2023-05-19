@@ -1,10 +1,11 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import { StatusBar, TextInput, Pressable, StyleSheet, View, Image, Text, ScrollView, ImageBackground, Button } from "react-native";
 import { useQuery, gql } from '@apollo/client';
 import images from './Image';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import Toast from 'react-native-root-toast';
+import { Asset } from 'expo-asset';
 
 //define data type
 type Rocket = {
@@ -35,7 +36,19 @@ query Rockets {
     }
   }`
 
+   //define toast 
+   const toastConfig= {
+     duration: Toast.durations.SHORT,
+     position: Toast.positions.CENTER,
+   }
+
+   const showToast = () => Toast.show('Select a filter first to search', toastConfig)
+
 function Home() {
+
+   //StackNavigationProp specifies navigation type
+    //RootStackParamList is the screen type
+    const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'Data1' | 'Data2' | 'Data3' | 'Data4'>>()
 
     //retrieve data 
     const { loading, error, data } = useQuery(GET_ROCKET)
@@ -45,16 +58,29 @@ function Home() {
     const [selectedFilter, setSelectedFilter] = useState('')
     const [filterName, setFilterName] = useState('Filter')
 
-    //define toast 
-    const showToast = () => Toast.show('Select a filter first to search', toastConfig)
-    const toastConfig= {
-      duration: Toast.durations.SHORT,
-      position: Toast.positions.CENTER,
-    }
+    const [isLoadingComplete, setLoadingComplete] = useState(false);
 
-    //StackNavigationProp specifies navigation type
-    //RootStackParamList is the screen type
-    const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'Data1' | 'Data2' | 'Data3' | 'Data4'>>()
+    //load image properly
+    useEffect(() => {
+      async function loadResourcesAsync() {
+        await Asset.loadAsync([require('../assets/images/main_background.jpg')]);
+      }
+  
+      async function loadResourcesAndDataAsync() {
+        try {
+          await loadResourcesAsync();
+          setLoadingComplete(true);
+        } catch (e) {
+          console.warn(e);
+        }
+      }
+  
+      loadResourcesAndDataAsync();
+    }, []);
+  
+    if (!isLoadingComplete) {
+      return null;
+    }
 
     const toggleDropdown = () => {
       setIsOpen(!isOpen)
@@ -118,7 +144,7 @@ function Home() {
 
     return (
       <View style={styles.container}>
-       <ImageBackground source={require('./images/main_background.png')} style={styles.imageBackground} >
+       <ImageBackground source={require('../assets/images/main_background.jpg')} style={styles.imageBackground} >
         
         <StatusBar barStyle="light-content" translucent={true}/>
 

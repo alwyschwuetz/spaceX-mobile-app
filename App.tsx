@@ -40,7 +40,7 @@ export default function App() {
                 pages={[
                   {
                     backgroundColor: '#6F84C5',
-                    image: <Image source={require('./src/images/onboarding.jpg')} style={styles.image} />,
+                    image: <Image source={require('./assets/images/onboarding.jpg')} style={styles.image} />,
                     title: 'SpaceX',
                     subtitle: 'Continue to see all the rockets information',
                     titleStyles: { color: 'black', fontSize: 24 },

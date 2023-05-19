@@ -1,8 +1,9 @@
 import { useQuery, gql } from '@apollo/client';
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import { StatusBar, StyleSheet, View, Text, Button, ScrollView, ImageBackground, TouchableOpacity, Linking } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { Asset } from 'expo-asset';
 
 //define 1 screen
 type RootStackParamList = {
@@ -32,11 +33,35 @@ query Rockets {
   }`
 
 function Data2() {
+   //to use navigation
+   const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'Home'>>()
+
     //retrieve data 
     const { loading, error, data } = useQuery(GET_DETAILS);
 
-    //to use navigation
-    const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'Home'>>()
+    const [isLoadingComplete, setLoadingComplete] = useState(false);
+
+     //load image properly
+    useEffect(() => {
+      async function loadResourcesAsync() {
+        await Asset.loadAsync([require('../../assets/images/detail_background.jpg')]);
+      }
+  
+      async function loadResourcesAndDataAsync() {
+        try {
+          await loadResourcesAsync();
+          setLoadingComplete(true);
+        } catch (e) {
+          console.warn(e);
+        }
+      }
+  
+      loadResourcesAndDataAsync();
+    }, []);
+  
+    if (!isLoadingComplete) {
+      return null;
+    }
 
     if (loading) {
       return (
@@ -66,7 +91,7 @@ function Data2() {
 
           return(
             <View style={styles.container}>
-              <ImageBackground source={require('../images/detail_background.jpg')} style={styles.imageBackground}>
+              <ImageBackground source={require('../../assets/images/detail_background.jpg')} style={styles.imageBackground}>
               <StatusBar barStyle="light-content" />
               
               <View style={styles.cardContainer}>
