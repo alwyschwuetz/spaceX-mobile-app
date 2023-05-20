@@ -62,13 +62,22 @@ function Home() {
     const [isLoadingComplete, setLoadingComplete] = useState(false)
 
     //retrieve data 
-    const { loading, error, data, fetchMore } = useQuery(GET_ROCKET,
+    const { loading, error, data, fetchMore} = useQuery(GET_ROCKET,
       { 
-        client, 
         variables: {
           limit: PAGE_SIZE,
           offset: page * PAGE_SIZE
       }})
+
+      const onLoadMore = () => {
+        fetchMore({
+          variables: {
+            offset: (page + 1) * PAGE_SIZE,
+          },
+        }).then(() => {
+          setPage((prevPage) => prevPage + 1)
+        })
+      }
 
     //load image properly
     useEffect(() => {
@@ -162,6 +171,7 @@ function Home() {
 
     console.log(data)
     console.log(page)
+    console.log(onLoadMore)
     return (
       <View style={styles.container}>
        <ImageBackground source={require('../assets/images/main_background.jpg')} style={styles.imageBackground} >
@@ -247,7 +257,7 @@ function Home() {
             <View style={styles.pageBtnContainer}>
               <Button title="Previous" onPress={() => setPage((prev) => prev - 1)} />
               <Text>Page {page + 1} </Text>
-              <Button title="Next" onPress={() => setPage((prev) => prev + 1)} />
+              <Button title="Next" onPress={onLoadMore} />
             </View>
             
           {/* </ScrollView> */}

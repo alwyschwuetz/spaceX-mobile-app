@@ -13,6 +13,14 @@ import Data3 from './src/Detail/Data3';
 import Data4 from './src/Detail/Data4';
 import { Image } from 'expo-image';
 
+  //Initialize Apollo Client
+  const client = new ApolloClient({
+    uri: 'https://main--spacex-l4uc6p.apollographos.net/graphql',
+    cache: new InMemoryCache(),
+  });
+
+  const Stack = createNativeStackNavigator()
+
 export default function App() {
   
   const [showOnboarding, setShowOnboarding] = useState(true);
@@ -34,14 +42,6 @@ export default function App() {
   const handleOnboarding = () => {
     setShowOnboarding(false);
   };
-
-  //Initialize Apollo Client
-  const client = new ApolloClient({
-    uri: 'https://main--spacex-l4uc6p.apollographos.net/graphql',
-    cache: new InMemoryCache(),
-  });
-
-  const Stack = createNativeStackNavigator()
   
   return (
     <>
