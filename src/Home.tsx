@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import { StatusBar, ActivityIndicator, TextInput, Pressable, StyleSheet, View, Image, Text, ScrollView, ImageBackground, Button } from "react-native";
+import { StatusBar, ActivityIndicator, TouchableOpacity,TextInput, Pressable, StyleSheet, View, Image, FlatList, Text, ScrollView, ImageBackground, Button } from "react-native";
 import { useQuery, gql, useApolloClient  } from '@apollo/client';
 import images from './Image';
 import { useNavigation } from '@react-navigation/native';
@@ -26,16 +26,14 @@ type RootStackParamList = {
 
 //define query wanted
 const GET_ROCKET = gql`
-query Rockets($limit: Int!, $offset: Int!) {
-    rockets(limit: $limit, offset: $offset) {
+query Rockets {
+    rockets {
       id
       name
       country
       first_flight
     }
   }`
-
-  const PAGE_SIZE = 1
 
    //define toast 
    const toastConfig= {
@@ -47,37 +45,20 @@ query Rockets($limit: Int!, $offset: Int!) {
 
 function Home() {
 
-  const client = useApolloClient();
-
    //StackNavigationProp specifies navigation type
     //RootStackParamList is the screen type
     const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'Data1' | 'Data2' | 'Data3' | 'Data4'>>()
 
-    const [page, setPage] = useState(0)
     const [isOpen, setIsOpen] = useState(false)
     const [filteredData, setFilteredData] = useState<Rocket[]>([])
     const [selectedFilter, setSelectedFilter] = useState('')
     const [filterName, setFilterName] = useState('Filter')
+    const [activePage, setActivePage] = useState(0);
 
     const [isLoadingComplete, setLoadingComplete] = useState(false)
 
     //retrieve data 
-    const { loading, error, data, fetchMore} = useQuery(GET_ROCKET,
-      { 
-        variables: {
-          limit: PAGE_SIZE,
-          offset: page * PAGE_SIZE
-      }})
-
-      const onLoadMore = () => {
-        fetchMore({
-          variables: {
-            offset: (page + 1) * PAGE_SIZE,
-          },
-        }).then(() => {
-          setPage((prevPage) => prevPage + 1)
-        })
-      }
+    const { loading, error, data} = useQuery(GET_ROCKET)
 
     //load image properly
     useEffect(() => {
@@ -169,9 +150,50 @@ function Home() {
   //Success state handling
   if (data) {
 
-    console.log(data)
-    console.log(page)
-    console.log(onLoadMore)
+    type RocketItemProps = {
+      rocket: Rocket;
+    };
+
+    const RocketItem = ({ rocket }: RocketItemProps) => {
+      // Verify id to img
+      const imageId = images.find((img) => img.id === rocket.id);
+    
+      // Filter the pages to navigate
+      const onPressHandler = () => {
+        if (rocket.id === "5e9d0d95eda69955f709d1eb") {
+          navigation.navigate('Data1');
+        } else if (rocket.id === "5e9d0d95eda69973a809d1ec") {
+          navigation.navigate('Data2');
+        } else if (rocket.id === "5e9d0d95eda69974db09d1ed") {
+          navigation.navigate('Data3');
+        } else if (rocket.id === "5e9d0d96eda699382d09d1ee") {
+          navigation.navigate('Data4');
+        }
+      };
+    
+      return (
+        <View style={styles.card}>
+          {imageId && (
+            <View style={styles.imageContainer}>
+              <Image style={styles.image} source={{ uri: imageId.url }} />
+            </View>
+          )}
+    
+          <View style={styles.cardDetails}>
+            <View style={styles.cardContent}>
+              <Text style={styles.text}>Name: {rocket.name}</Text>
+              <Text style={styles.text}>Country: {rocket.country}</Text>
+              <Text style={styles.text}>First Flight: {rocket.first_flight}</Text>
+            </View>
+          </View>
+    
+          {/* <Pressable onPress={() => onPressHandler()}> */}
+          {/* ... */}
+          {/* </Pressable> */}
+        </View>
+      );
+    };
+
     return (
       <View style={styles.container}>
        <ImageBackground source={require('../assets/images/main_background.jpg')} style={styles.imageBackground} >
@@ -195,72 +217,11 @@ function Home() {
                 )}
               </View>
           
-          {/* <ScrollView showsHorizontalScrollIndicator={false} horizontal={true}> */}
-
-            {/* { (filteredData.length > 0 ? filteredData : data.rockets).map((rocket: Rocket) => { */}
-            {data.rockets.map((rocket: Rocket) => {
-
-
-              //verify id to img
-              const imageId = images.find((img) => img.id === rocket.id);
-            
-              //filter the pages to navigate 
-              const onPressHandler = () => {
-          
-              if(rocket.id === "5e9d0d95eda69955f709d1eb") {
-                navigation.navigate('Data1')
-              }
-              else if (rocket.id === "5e9d0d95eda69973a809d1ec") {
-                navigation.navigate('Data2')
-              }
-              else if (rocket.id === "5e9d0d95eda69974db09d1ed") {
-                navigation.navigate('Data3')
-              }
-              else if (rocket.id === "5e9d0d96eda699382d09d1ee") {
-                navigation.navigate('Data4')
-              }
-            }
-
-              return (
-                // Individual card display
-                <View key={rocket.id} style={styles.card}>
-                  
-                  {/* passing in rocket id to detail page */}
-                  {/* <Pressable onPress={() => onPressHandler()}> */}
-
-                  {/* display web image with uri*/}
-                  {imageId && (
-                    <View style={styles.imageContainer}>
-                      <Image style={styles.image} source={{ uri: imageId.url }} />
-                    </View>
-                  )}
-
-                  {/* all the rocket details */}
-                  <View style={styles.cardDetails}>
-
-                    <View style={styles.cardContent}>
-                      <Text style={styles.text}>Name: {rocket.name}</Text>
-                      <Text style={styles.text}>Country: {rocket.country}</Text>
-                      <Text style={styles.text}>First Flight: {rocket.first_flight}</Text>
-                    </View>
-
-                    {/* <View style={styles.cardDescription}>
-                      <Text style={styles.text}>Description:{"\n"}{rocket.description}</Text>
-                    </View> */}
-
-                  </View>
-                  {/* </Pressable> */}
-                </View>
-              )
-            })}
-
-            <View style={styles.pageBtnContainer}>
-              <Button title="Previous" onPress={() => setPage((prev) => prev - 1)} />
-              <Text>Page {page + 1} </Text>
-              <Button title="Next" onPress={onLoadMore} />
-            </View>
-            
-          {/* </ScrollView> */}
+              <FlatList
+  data={filteredData.length > 0 ? filteredData : data.rockets}
+  keyExtractor={(item) => item.id}
+  renderItem={({ item }) => <RocketItem rocket={item} />}
+/>
           </ImageBackground>
       </View>
   )}
