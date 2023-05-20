@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import { StatusBar, TextInput, Pressable, StyleSheet, View, Image, Text, ScrollView, ImageBackground, Button } from "react-native";
-import { useQuery, gql } from '@apollo/client';
+import { StatusBar, ActivityIndicator, TextInput, Pressable, StyleSheet, View, Image, Text, ScrollView, ImageBackground, Button } from "react-native";
+import { useQuery, gql, useApolloClient  } from '@apollo/client';
 import images from './Image';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -26,15 +26,16 @@ type RootStackParamList = {
 
 //define query wanted
 const GET_ROCKET = gql`
-query Rockets {
-    rockets {
+query Rockets($limit: Int!, $offset: Int!) {
+    rockets(limit: $limit, offset: $offset) {
       id
       name
       country
       first_flight
-      description
     }
   }`
+
+  const PAGE_SIZE = 1
 
    //define toast 
    const toastConfig= {
@@ -46,19 +47,28 @@ query Rockets {
 
 function Home() {
 
+  const client = useApolloClient();
+
    //StackNavigationProp specifies navigation type
     //RootStackParamList is the screen type
     const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'Data1' | 'Data2' | 'Data3' | 'Data4'>>()
 
-    //retrieve data 
-    const { loading, error, data } = useQuery(GET_ROCKET)
-
+    const [page, setPage] = useState(0)
     const [isOpen, setIsOpen] = useState(false)
     const [filteredData, setFilteredData] = useState<Rocket[]>([])
     const [selectedFilter, setSelectedFilter] = useState('')
     const [filterName, setFilterName] = useState('Filter')
 
-    const [isLoadingComplete, setLoadingComplete] = useState(false);
+    const [isLoadingComplete, setLoadingComplete] = useState(false)
+
+    //retrieve data 
+    const { loading, error, data, fetchMore } = useQuery(GET_ROCKET,
+      { 
+        client, 
+        variables: {
+          limit: PAGE_SIZE,
+          offset: page * PAGE_SIZE
+      }})
 
     //load image properly
     useEffect(() => {
@@ -68,18 +78,18 @@ function Home() {
   
       async function loadResourcesAndDataAsync() {
         try {
-          await loadResourcesAsync();
-          setLoadingComplete(true);
+          await loadResourcesAsync()
+          setLoadingComplete(true)
         } catch (e) {
-          console.warn(e);
+          console.warn(e)
         }
       }
   
-      loadResourcesAndDataAsync();
-    }, []);
+      loadResourcesAndDataAsync()
+    }, [])
   
     if (!isLoadingComplete) {
-      return null;
+      return null
     }
 
     const toggleDropdown = () => {
@@ -125,23 +135,33 @@ function Home() {
   if (loading) {
     return (
       <View style={styles.container}>
+        <ImageBackground source={require('../assets/images/main_background.jpg')} style={styles.imageBackground} >
         <Text style={styles.stateText}>Loading...</Text>
+        <View style={styles.activityIndicatorContainer}>
+          <ActivityIndicator size="large" color="#6F84C5" />
+        </View>
+        </ImageBackground>
       </View>
     )}
   
   //Error state handler
   if (error) {
+    console.log(error)
     return (
       <View style={styles.container}>
+        <ImageBackground source={require('../assets/images/main_background.jpg')} style={styles.imageBackground} >
         <Text style={styles.stateText}>
           Error: There is a problem retrieving data
         </Text>
+        </ImageBackground>
       </View>
         )}
   
   //Success state handling
   if (data) {
 
+    console.log(data)
+    console.log(page)
     return (
       <View style={styles.container}>
        <ImageBackground source={require('../assets/images/main_background.jpg')} style={styles.imageBackground} >
@@ -165,9 +185,11 @@ function Home() {
                 )}
               </View>
           
-          <ScrollView showsHorizontalScrollIndicator={false} horizontal={true}>
+          {/* <ScrollView showsHorizontalScrollIndicator={false} horizontal={true}> */}
 
-            { (filteredData.length > 0 ? filteredData : data.rockets).map((rocket: Rocket) => {
+            {/* { (filteredData.length > 0 ? filteredData : data.rockets).map((rocket: Rocket) => { */}
+            {data.rockets.map((rocket: Rocket) => {
+
 
               //verify id to img
               const imageId = images.find((img) => img.id === rocket.id);
@@ -194,7 +216,7 @@ function Home() {
                 <View key={rocket.id} style={styles.card}>
                   
                   {/* passing in rocket id to detail page */}
-                  <Pressable onPress={() => onPressHandler()}>
+                  {/* <Pressable onPress={() => onPressHandler()}> */}
 
                   {/* display web image with uri*/}
                   {imageId && (
@@ -212,17 +234,23 @@ function Home() {
                       <Text style={styles.text}>First Flight: {rocket.first_flight}</Text>
                     </View>
 
-                    <View style={styles.cardDescription}>
+                    {/* <View style={styles.cardDescription}>
                       <Text style={styles.text}>Description:{"\n"}{rocket.description}</Text>
-                    </View>
+                    </View> */}
 
                   </View>
-                  </Pressable>
+                  {/* </Pressable> */}
                 </View>
               )
             })}
+
+            <View style={styles.pageBtnContainer}>
+              <Button title="Previous" onPress={() => setPage((prev) => prev - 1)} />
+              <Text>Page {page + 1} </Text>
+              <Button title="Next" onPress={() => setPage((prev) => prev + 1)} />
+            </View>
             
-          </ScrollView>
+          {/* </ScrollView> */}
           </ImageBackground>
       </View>
   )}
@@ -233,17 +261,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  activityIndicatorContainer: {
+    marginTop: 40,
+  },
   stateText: {
-    fontSize: 30,
-    color: 'black',
+    fontSize: 40,
+    color: 'white',
     textAlign: 'center',
-    marginTop: '50%'
+    marginTop: '60%'
   },
   filterButton: {
     position: 'absolute',
     marginTop: 55,
     borderRadius: 20,
-    zIndex: 1, // Ensure the button is rendered above other elements
+    zIndex: 1,
     backgroundColor: 'rgba(255, 255, 255, 0.75)',
     marginLeft: '55%',
     width: 30,
@@ -266,6 +297,10 @@ const styles = StyleSheet.create({
     height: '100%',
     resizeMode: 'cover',
   },
+  pageBtnContainer: {
+    display: 'flex',
+    justifyContent: 'space-between'
+  },
   card: {
     width: 335,
     borderRadius: 30,
@@ -279,7 +314,7 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     width: '100%',
-    height: 400,
+    height: 0,
     overflow: 'hidden',
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30

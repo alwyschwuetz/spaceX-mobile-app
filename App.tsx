@@ -4,21 +4,14 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { RootSiblingParent } from 'react-native-root-siblings';
 import Onboarding from 'react-native-onboarding-swiper';
 import { useState, useEffect } from 'react';
-import { StyleSheet, Image, ActivityIndicator} from 'react-native';
+import { StyleSheet, ActivityIndicator} from 'react-native';
 import { Asset } from 'expo-asset';
 import Home from './src/Home';
 import Data1 from './src/Detail/Data1';
 import Data2 from './src/Detail/Data2';
 import Data3 from './src/Detail/Data3';
 import Data4 from './src/Detail/Data4';
-
-//Initialize Apollo Client
-const client = new ApolloClient({
-  uri: 'https://main--spacex-l4uc6p.apollographos.net/graphql',
-  cache: new InMemoryCache(),
-});
-
-const Stack = createNativeStackNavigator()
+import { Image } from 'expo-image';
 
 export default function App() {
   
@@ -41,6 +34,14 @@ export default function App() {
   const handleOnboarding = () => {
     setShowOnboarding(false);
   };
+
+  //Initialize Apollo Client
+  const client = new ApolloClient({
+    uri: 'https://main--spacex-l4uc6p.apollographos.net/graphql',
+    cache: new InMemoryCache(),
+  });
+
+  const Stack = createNativeStackNavigator()
   
   return (
     <>
@@ -52,6 +53,7 @@ export default function App() {
           {showOnboarding ? (
               <Onboarding
                 onDone={handleOnboarding}
+                skipLabel="" // Empty string to remove the "Skip" label
                 pages={[
                   {
                     backgroundColor: '#6F84C5',
@@ -63,7 +65,21 @@ export default function App() {
                         style={styles.image}
                       />),
                     title: 'SpaceX',
-                    subtitle: 'Continue to see all the rockets information',
+                    subtitle: 'Continue to use the app',
+                    titleStyles: { color: 'black', fontSize: 24 },
+                    subTitleStyles: { color: 'black', fontSize: 16 },
+                  },
+                  {
+                    backgroundColor: '#6F84C5',
+                    image: isImageLoading ? (
+                      <ActivityIndicator size="large" color="white" />
+                    ) : (
+                      <Image
+                        source={require('./assets/images/onboard2.jpg')}
+                        style={styles.image}
+                      />),
+                    title: 'Home Screen',
+                    subtitle: 'Swipe left to see more content',
                     titleStyles: { color: 'black', fontSize: 24 },
                     subTitleStyles: { color: 'black', fontSize: 16 },
                   }

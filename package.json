@@ -34,7 +34,8 @@
     "react-native-toast-message": "^2.1.6",
     "react-native-vector-icons": "^9.2.0",
     "react-native-web": "~0.18.10",
-    "react-navigation": "^4.4.4"
+    "react-navigation": "^4.4.4",
+    "expo-image": "~1.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

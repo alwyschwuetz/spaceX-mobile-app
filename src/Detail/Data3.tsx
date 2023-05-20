@@ -1,6 +1,6 @@
 import { useQuery, gql } from '@apollo/client';
 import React, {useState, useEffect} from 'react';
-import { StatusBar, StyleSheet, View, Text, Button, ScrollView, ImageBackground, TouchableOpacity, Linking } from 'react-native';
+import { StatusBar, ActivityIndicator, StyleSheet, View, Text, Button, ScrollView, ImageBackground, TouchableOpacity, Linking } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { Asset } from 'expo-asset';
@@ -17,6 +17,7 @@ query Rockets {
       id
       active
       name
+      first_flight
       country
       company
       cost_per_launch
@@ -62,87 +63,102 @@ function Data3() {
     if (!isLoadingComplete) {
       return null;
     }
+  
+    //sending to wiki link
+    const onPressHandler = () => {
+      Linking.openURL('https://en.wikipedia.org/wiki/Falcon_Heavy')
+    }
 
-    if (loading) {
-      return (
-        <View style={styles.container}>
-          <Text style={styles.stateText}>Loading...</Text>
-        </View>
-      );}
-    
-      if (error) {
+      //Loading state handler
+      if(loading) {
         return (
           <View style={styles.container}>
-            <Text>
-              Error: There is a problem retrieving data
-            </Text>
+            <ImageBackground source={require('../../assets/images/detail_background.jpg')} style={styles.imageBackground} >
+              <Text style={styles.stateText}>Loading...</Text>
+
+              <View style={styles.activityIndicatorContainer}>
+                <ActivityIndicator size="large" color="#6F84C5" />
+              </View>
+
+            </ImageBackground>
           </View>
-        );}
+      )}
 
-        if(data) {
+      //Error state handler
+      if(error) {
+        return (
+          <View style={styles.container}>
+            <ImageBackground source={require('../../assets/images/detail_background.jpg')} style={styles.imageBackground} >
+              <Text style={styles.stateText}>
+                Error: There is a problem retrieving data
+              </Text>
+            </ImageBackground>
+          </View>
+      )}
 
-          //using the third data in query
-          const newRocket = data.rockets[2]
+      if(data) {
 
-          //sending to wiki link
-          const onPressHandler = () => {
-            Linking.openURL('https://en.wikipedia.org/wiki/Falcon_1')
-          }
+      //using the third data in query
+      const newRocket = data.rockets[2]
 
-          return(
-            <View style={styles.container}>
-              <ImageBackground source={require('../../assets/images/detail_background.jpg')} style={styles.imageBackground}>
-              <StatusBar barStyle="light-content" />
+      return(
+        <View style={styles.container}>
+            <ImageBackground source={require('../../assets/images/detail_background.jpg')} style={styles.imageBackground}>
+            <StatusBar barStyle="light-content" />
               
-              <View style={styles.cardContainer}>
-                <ScrollView showsVerticalScrollIndicator={false} >
-                  
-                    <View style={styles.card} >
-                      <View style={styles.titleContainer}>
-                        <Text style={styles.title}>Full Details 🚀</Text>
-                      </View>
-                      
-                      <View style={styles.cardDetails} >
-                        <Text style={styles.text}>Rocket ID: {newRocket.id} {"\n"}</Text>
-                        <Text style={styles.text}>Active: {newRocket.active? "True" : "False"}{"\n"} </Text>
-                        <Text style={styles.text}>Rocket Name: {newRocket.name}{"\n"}</Text>
-                        <Text style={styles.text}>Country: {newRocket.country}{"\n"}</Text>
-                        <Text style={styles.text}>Company: {newRocket.company}{"\n"}</Text>
-                        <Text style={styles.text}>Cost Per Launch: US${newRocket.cost_per_launch}{"\n"}</Text>
-                        <Text style={styles.text}>Success Rate: {newRocket.success_rate_pct}%{"\n"}</Text>
-                        <Text style={styles.text}>Mass: {newRocket.mass.kg} kilograms{"\n"}</Text>
-                        <Text style={styles.text}>Height: {newRocket.height.meters} meters{"\n"}</Text>
-                        <Text style={styles.text}>Description: {newRocket.description}{"\n"}</Text>
-                        
-                        <Text style={styles.text}>Wikipedia</Text>
-                        <TouchableOpacity onPress={onPressHandler}>
-                          <Text style={styles.text}>{newRocket.wikipedia}</Text>
-                        </TouchableOpacity>
+            <View style={styles.cardContainer}>
+              <ScrollView showsVerticalScrollIndicator={false} >
+                
+                <View style={styles.card} >
+                  <View style={styles.titleContainer}>
+                    <Text style={styles.title}>Full Details 🚀</Text>
+                  </View>
+                    
+                  <View style={styles.cardDetails} >
+                    <Text style={styles.text}>Rocket ID: {newRocket.id} {"\n"}</Text>
+                    <Text style={styles.text}>Active: {newRocket.active? "True" : "False"}{"\n"} </Text>
+                    <Text style={styles.text}>Rocket Name: {newRocket.name}{"\n"}</Text>
+                    <Text style={styles.text}>First Flight: {newRocket.first_flight}{"\n"}</Text>
+                    <Text style={styles.text}>Country: {newRocket.country}{"\n"}</Text>
+                    <Text style={styles.text}>Company: {newRocket.company}{"\n"}</Text>
+                    <Text style={styles.text}>Cost Per Launch: US${newRocket.cost_per_launch}{"\n"}</Text>
+                    <Text style={styles.text}>Success Rate: {newRocket.success_rate_pct}%{"\n"}</Text>
+                    <Text style={styles.text}>Mass: {newRocket.mass.kg} kilograms{"\n"}</Text>
+                    <Text style={styles.text}>Height: {newRocket.height.meters} meters{"\n"}</Text>
+                    <Text style={styles.text}>Description: {newRocket.description}{"\n"}</Text>
+                
+                    <Text style={styles.text}>Wikipedia</Text>
+                    <TouchableOpacity onPress={onPressHandler}>
+                      <Text style={styles.text}>{newRocket.wikipedia}</Text>
+                    </TouchableOpacity>
+                  </View>
 
-                      </View>
-                    <View style={styles.button}>
-                      <Button title='Back Home' onPress={() => navigation.navigate("Home") }/>
-                    </View>
+                  <View style={styles.button}>
+                    <Button title='Back Home' onPress={() => navigation.navigate("Home") }/>
+                  </View>
 
-                    </View>
-                </ScrollView>
                 </View>
-              </ImageBackground>
-            </View>
-          )
-        }
-        return null
+              </ScrollView>
+              </View>
+            </ImageBackground>
+          </View>
+        )
+      }
+    return null
   }
 
   const styles = StyleSheet.create({
     container: {
       flex: 1,
     },
+    activityIndicatorContainer: {
+      marginTop: 40,
+    },
     stateText: {
-      fontSize: 30,
-      color: 'black',
+      fontSize: 40,
+      color: 'white',
       textAlign: 'center',
-      marginTop: '50%'
+      marginTop: '60%'
     },
     imageBackground: {
       width: '100%',
