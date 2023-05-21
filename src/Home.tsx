@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import { StatusBar, ActivityIndicator, TouchableOpacity,TextInput, Pressable, StyleSheet, View, Image, FlatList, Text, ScrollView, ImageBackground, Button } from "react-native";
-import { useQuery, gql, useApolloClient  } from '@apollo/client';
+import { StatusBar, ActivityIndicator, TouchableOpacity, TextInput, Pressable, StyleSheet, View, Image, FlatList, Text, ImageBackground, Button } from "react-native";
+import { useQuery, gql } from '@apollo/client';
 import images from './Image';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -10,7 +10,7 @@ import { Asset } from 'expo-asset';
 //define data type
 type Rocket = {
   id: string,
-  name: string,
+  name: string,      
   country: string,
   first_flight: string,
   description: string,
@@ -53,8 +53,6 @@ function Home() {
     const [filteredData, setFilteredData] = useState<Rocket[]>([])
     const [selectedFilter, setSelectedFilter] = useState('')
     const [filterName, setFilterName] = useState('Filter')
-    const [activePage, setActivePage] = useState(0);
-
     const [isLoadingComplete, setLoadingComplete] = useState(false)
 
     //retrieve data 
@@ -151,23 +149,23 @@ function Home() {
   if (data) {
 
     type RocketItemProps = {
-      rocket: Rocket;
+      rocket: Rocket
     };
 
     const RocketItem = ({ rocket }: RocketItemProps) => {
       // Verify id to img
-      const imageId = images.find((img) => img.id === rocket.id);
-    
+      const imageId = images.find((img) => img.id === rocket.id)
+  
       // Filter the pages to navigate
       const onPressHandler = () => {
         if (rocket.id === "5e9d0d95eda69955f709d1eb") {
-          navigation.navigate('Data1');
+          navigation.navigate('Data1')
         } else if (rocket.id === "5e9d0d95eda69973a809d1ec") {
-          navigation.navigate('Data2');
+          navigation.navigate('Data2')
         } else if (rocket.id === "5e9d0d95eda69974db09d1ed") {
-          navigation.navigate('Data3');
+          navigation.navigate('Data3')
         } else if (rocket.id === "5e9d0d96eda699382d09d1ee") {
-          navigation.navigate('Data4');
+          navigation.navigate('Data4')
         }
       };
     
@@ -184,15 +182,16 @@ function Home() {
               <Text style={styles.text}>Name: {rocket.name}</Text>
               <Text style={styles.text}>Country: {rocket.country}</Text>
               <Text style={styles.text}>First Flight: {rocket.first_flight}</Text>
+
+              <View  style={styles.infoButton}>
+                <Button title="More info" onPress={onPressHandler} color={'white'}/>
+              </View>
+
             </View>
           </View>
-    
-          {/* <Pressable onPress={() => onPressHandler()}> */}
-          {/* ... */}
-          {/* </Pressable> */}
         </View>
-      );
-    };
+      )
+    }
 
     return (
       <View style={styles.container}>
@@ -216,12 +215,14 @@ function Home() {
                 </View>
                 )}
               </View>
-          
-              <FlatList
-  data={filteredData.length > 0 ? filteredData : data.rockets}
-  keyExtractor={(item) => item.id}
-  renderItem={({ item }) => <RocketItem rocket={item} />}
-/>
+                  
+            <FlatList
+              data={filteredData.length > 0 ? filteredData : data.rockets}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => <RocketItem rocket={item} />}
+              horizontal={true}
+            />
+
           </ImageBackground>
       </View>
   )}
@@ -271,6 +272,20 @@ const styles = StyleSheet.create({
   pageBtnContainer: {
     display: 'flex',
     justifyContent: 'space-between'
+  },
+  showMoreButton: {
+marginVertical: 10,
+    padding: 10,
+    backgroundColor: '#6F84C5',
+    color: 'white',
+    textAlign: 'center',
+  },
+  infoButton: {
+    // borderRadius: 100,
+    // width: 43,
+    // borderColor: 'white',
+    // borderWidth: 2,
+    // height: 
   },
   card: {
     width: 335,

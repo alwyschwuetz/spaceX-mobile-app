@@ -1,4 +1,4 @@
-import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client';
+import { ApolloClient, InMemoryCache, ApolloProvider, Reference } from '@apollo/client';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { RootSiblingParent } from 'react-native-root-siblings';
@@ -16,32 +16,44 @@ import { Image } from 'expo-image';
   //Initialize Apollo Client
   const client = new ApolloClient({
     uri: 'https://main--spacex-l4uc6p.apollographos.net/graphql',
-    cache: new InMemoryCache(),
-  });
+    cache: new InMemoryCache({
+      typePolicies: {
+        Query: {
+          fields: {
+            rockets: {
+              merge(existing: Reference[] = [], incoming: Reference[]) {
+                return incoming;
+              },
+            },
+          },
+        },
+      },
+    }),
+  })
 
   const Stack = createNativeStackNavigator()
 
 export default function App() {
   
-  const [showOnboarding, setShowOnboarding] = useState(true);
-  const [isImageLoading, setImageLoading] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(true)
+  const [isImageLoading, setImageLoading] = useState(true)
   
   useEffect(() => {
     const loadImage = async () => {
       try {
-        await Asset.loadAsync(require('./assets/images/onboarding.jpg'));
-        setImageLoading(false);
+        await Asset.loadAsync(require('./assets/images/onboarding.jpg'))
+        setImageLoading(false)
       } catch (error) {
-        console.error('Error loading image:', error);
+        console.error('Error loading image:', error)
       }
-    };
+    }
   
-    loadImage();
-  }, []);
+    loadImage()
+  }, [])
 
   const handleOnboarding = () => {
-    setShowOnboarding(false);
-  };
+    setShowOnboarding(false)
+  }
   
   return (
     <>
@@ -98,7 +110,7 @@ export default function App() {
         </RootSiblingParent>
       </ApolloProvider>
     </>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -106,4 +118,4 @@ const styles = StyleSheet.create({
     width: 300,
     height: 300,
   },
-});
+})
