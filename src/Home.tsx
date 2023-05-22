@@ -1,11 +1,23 @@
 import React, {useEffect, useState} from 'react';
-import { StatusBar, ActivityIndicator, TouchableOpacity, TextInput, Pressable, StyleSheet, View, Image, FlatList, Text, ImageBackground, Button } from "react-native";
+import { 
+  StatusBar, 
+  ActivityIndicator, 
+  TouchableOpacity, 
+  TextInput, 
+  StyleSheet, 
+  View, 
+  Image, 
+  FlatList, 
+  Text, 
+  ImageBackground, 
+  Button } from "react-native";
 import { useQuery, gql } from '@apollo/client';
-import images from './Image';
+import ImageUrl from './ImageUrl';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import Toast from 'react-native-root-toast';
 import { Asset } from 'expo-asset';
+import Icon  from 'react-native-vector-icons/FontAwesome';
 
 //define data type
 type Rocket = {
@@ -13,8 +25,7 @@ type Rocket = {
   name: string,      
   country: string,
   first_flight: string,
-  description: string,
-  }
+}
 
 //define 4 screen name
 type RootStackParamList = {
@@ -22,46 +33,52 @@ type RootStackParamList = {
   Data4: undefined,
   Data2: undefined,
   Data3: undefined,
-};
+}
 
 //define query wanted
 const GET_ROCKET = gql`
 query Rockets {
-    rockets {
-      id
-      name
-      country
-      first_flight
+  rockets {
+    id
+    active
+    name
+    country
+    company
+    cost_per_launch
+    first_flight
+    success_rate_pct
+    mass {
+      kg
     }
-  }`
-
-   //define toast 
-   const toastConfig= {
-     duration: Toast.durations.SHORT,
-     position: Toast.positions.CENTER,
-   }
-
-   const showToast = () => Toast.show('Select a filter first to search', toastConfig)
+    height {
+      meters
+    }
+    description
+    wikipedia
+  }}`
 
 function Home() {
 
-   //StackNavigationProp specifies navigation type
+    //StackNavigationProp specifies navigation type
     //RootStackParamList is the screen type
     const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'Data1' | 'Data2' | 'Data3' | 'Data4'>>()
-
-    const [isOpen, setIsOpen] = useState(false)
-    const [filteredData, setFilteredData] = useState<Rocket[]>([])
-    const [selectedFilter, setSelectedFilter] = useState('')
-    const [filterName, setFilterName] = useState('Filter')
-    const [isLoadingComplete, setLoadingComplete] = useState(false)
 
     //retrieve data 
     const { loading, error, data} = useQuery(GET_ROCKET)
 
-    //load image properly
+    //useState hooks
+    const [isOpen, setIsOpen] = useState(false)
+    const [sortedData, setSortedData] = useState<Rocket[]>([])
+    const [sortingEnabled, setSortingEnabled] = useState(false)
+    const [isLoadingComplete, setLoadingComplete] = useState(false)
+    const [searchText, setSearchText] = useState('')
+    const [page, setPage] = useState(0)
+    const pageSize = 1
+
+    //load background image faster
     useEffect(() => {
       async function loadResourcesAsync() {
-        await Asset.loadAsync([require('../assets/images/main_background.jpg')]);
+        await Asset.loadAsync([require('../assets/images/main_background.jpg')])
       }
   
       async function loadResourcesAndDataAsync() {
@@ -75,48 +92,40 @@ function Home() {
   
       loadResourcesAndDataAsync()
     }, [])
-  
-    if (!isLoadingComplete) {
-      return null
-    }
 
-    const toggleDropdown = () => {
-      setIsOpen(!isOpen)
-      setFilterName('Filter')      
-    }
-
-    //filter the clicked button
-    const selectFilter = (filter: string) => {
-      setSelectedFilter(filter)
-      setIsOpen(false)
-    }
-
-    //search the text from input
+    //Search text from input
     const searchHandler = (text: string) => {
-
-      if (text !== '' && filterName ==='Filter') {
-        showToast();
-        return;
-      }
-      
-      // Filter the data based on the selected filter type and search text
-      const filteredItems = data.rockets.filter((prop: { name: string, country: string, first_flight: string, description: string }) => {
-        const newSearch = text.toLowerCase()
-        switch (selectedFilter) {
-          case 'Name':
-            return prop.name.toLowerCase().includes(newSearch)
-          case 'Country':
-            return prop.country.toLowerCase().includes(newSearch)
-          case 'First Flight':
-            return prop.first_flight.toLowerCase().toString().includes(newSearch)
-          case 'Description':
-            return prop.description.toLowerCase().includes(newSearch)
-          default:
-            return false;
+      const searchValue = (value: any, text: string) => {
+        if (typeof value === 'string') {
+          return value.toLowerCase().includes(text.toLowerCase())
+        } else if (typeof value === 'number' || typeof value === 'boolean') {
+          return value.toString().includes(text.toLowerCase())
+        } else if (typeof value === 'object') {
+          for (const key in value) {
+            if (searchValue(value[key], text)) {
+              return true
+            }
+          }
         }
+        return false
+      }
+
+      const searchedData = data.rockets.filter((rocket: Rocket) => {
+        return searchValue(rocket, text)
       })
-    
-      setFilteredData(filteredItems)
+
+      setSortedData(searchedData)
+      setPage(0)
+      
+      //Toast for no search results
+      if (searchedData.length === 0) {
+        Toast.show('No results found', {
+          position: Toast.positions.CENTER,
+          backgroundColor: 'rgba(255, 255, 255, 0.75)',
+          textColor: 'black',
+          shadowColor: 'transparent'
+        })
+      }    
     }
 
   //Loading state handler
@@ -124,37 +133,69 @@ function Home() {
     return (
       <View style={styles.container}>
         <ImageBackground source={require('../assets/images/main_background.jpg')} style={styles.imageBackground} >
-        <Text style={styles.stateText}>Loading...</Text>
-        <View style={styles.activityIndicatorContainer}>
-          <ActivityIndicator size="large" color="#6F84C5" />
-        </View>
+          <View style={styles.activityIndicatorContainer}>
+            <ActivityIndicator size="large" color="white" />
+          </View>
         </ImageBackground>
       </View>
-    )}
+    )
+  }
   
   //Error state handler
   if (error) {
-    console.log(error)
     return (
       <View style={styles.container}>
         <ImageBackground source={require('../assets/images/main_background.jpg')} style={styles.imageBackground} >
-        <Text style={styles.stateText}>
-          Error: There is a problem retrieving data
-        </Text>
+          <Text style={styles.stateText}>
+            Error: There is a problem retrieving data
+          </Text>
         </ImageBackground>
       </View>
-        )}
+    )
+  }
   
   //Success state handling
   if (data) {
-
+    //RocketItemProps defines the props for the RocketItem component
     type RocketItemProps = {
       rocket: Rocket
-    };
+    }
 
+    //Function to sort rockets by name in ascending order
+    const sortRocketsByNameAscending = () => {
+      const sortedData = [...data.rockets].sort((a, b) => a.name.localeCompare(b.name))
+      setSortedData(sortedData)
+      setSortingEnabled(true)
+      setIsOpen(false)
+    }
+
+    //Function to sort rockets by name in descending order
+    const sortRocketsByNameDescending = () => {
+      const sortedData = [...data.rockets].sort((a, b) => b.name.localeCompare(a.name))
+      setSortedData(sortedData)
+      setSortingEnabled(true)
+      setIsOpen(false)
+    }
+
+    //Calculate the total number of pages based on the data length and page size
+    const totalPages = Math.ceil((sortingEnabled ? sortedData.length : data?.rockets.length || 0) / pageSize)
+
+    //Previous and Next Page Functions
+    const loadMoreItems = () => {    
+      if (page < totalPages - 1) {
+        setPage(page + 1)
+      }
+    }
+    const loadPrevItems = () => {
+      if (page > 0) {
+        setPage(page - 1)
+      }
+    }
+
+    //RocketItem function for flatlist rendering
     const RocketItem = ({ rocket }: RocketItemProps) => {
       // Verify id to img
-      const imageId = images.find((img) => img.id === rocket.id)
+      const imageId = ImageUrl.find((img) => img.id === rocket.id)
   
       // Filter the pages to navigate
       const onPressHandler = () => {
@@ -167,7 +208,7 @@ function Home() {
         } else if (rocket.id === "5e9d0d96eda699382d09d1ee") {
           navigation.navigate('Data4')
         }
-      };
+      }
     
       return (
         <View style={styles.card}>
@@ -176,17 +217,18 @@ function Home() {
               <Image style={styles.image} source={{ uri: imageId.url }} />
             </View>
           )}
+          
+          <View style={styles.cardContentBubble}>
+            <Text style={styles.cardText2}>{rocket.name}</Text>
+            <Text style={styles.cardText2}>{rocket.country}</Text>
+          </View>
     
           <View style={styles.cardDetails}>
             <View style={styles.cardContent}>
-              <Text style={styles.text}>Name: {rocket.name}</Text>
-              <Text style={styles.text}>Country: {rocket.country}</Text>
               <Text style={styles.text}>First Flight: {rocket.first_flight}</Text>
-
               <View  style={styles.infoButton}>
                 <Button title="More info" onPress={onPressHandler} color={'white'}/>
               </View>
-
             </View>
           </View>
         </View>
@@ -196,36 +238,55 @@ function Home() {
     return (
       <View style={styles.container}>
        <ImageBackground source={require('../assets/images/main_background.jpg')} style={styles.imageBackground} >
-        
         <StatusBar barStyle="light-content" translucent={true}/>
 
-          {/* Search bar */}
           <View style={styles.search}>
-            <TextInput style={styles.inputContainer} placeholder='Search' onChangeText={text => searchHandler(text)}/>
+            <TextInput style={styles.inputContainer} placeholder='Search' value={searchText} onChangeText={text => {setSearchText(text); searchHandler(text)}}/>
           </View>
-              {/* filter buttons */}
-              <View style={styles.filterButton}>
-                <Button title={filterName} onPress={toggleDropdown} />
-                {isOpen && (
-                <View>
-                  <Button title='Name' onPress={() => {selectFilter('Name') ; setFilterName('Name')}}/>
-                  <Button title='Country' onPress={() => {selectFilter('Country'); setFilterName('Country')}}/>
-                  <Button title='First Flight' onPress={() => {selectFilter('First Flight'); setFilterName('First Flight')}}/>
-                  <Button title='Description'  onPress={() => {selectFilter('Description'); setFilterName('Description')}}/>
-                </View>
-                )}
-              </View>
-                  
-            <FlatList
-              data={filteredData.length > 0 ? filteredData : data.rockets}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => <RocketItem rocket={item} />}
-              horizontal={true}
-            />
 
-          </ImageBackground>
+            <View style={styles.sortButton}>
+              <Button title="Sort" onPress={() => {setIsOpen(!isOpen)}} />
+              {isOpen && (
+                <View>
+                  <Button title='A-Z' onPress={() => {sortRocketsByNameAscending(); setSearchText('')}}/>
+                  <Button title='Z-A' onPress={() => {sortRocketsByNameDescending(); setSearchText('')}}/>
+                </View>
+              )}
+            </View>
+
+          <FlatList
+            data={
+            sortingEnabled
+              ? sortedData.slice(page * pageSize, (page + 1) * pageSize)
+              : sortedData.length > 0
+              ? sortedData.slice(page * pageSize, (page + 1) * pageSize)
+              : data.rockets.slice(page * pageSize, (page + 1) * pageSize)
+            }
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => <RocketItem rocket={item} />}
+            horizontal={true}
+          />
+
+          <View style={styles.pageBtnContainer}>
+            <TouchableOpacity style={styles.pageBtn} onPress={loadPrevItems} disabled={page === 0 || loading}>
+              <View style={styles.buttonContent}>
+                <Icon name="chevron-left" size={20} color="black" />
+              </View>
+            </TouchableOpacity>
+
+            <Text style={styles.buttonText}>{page + 1}</Text>
+
+            <TouchableOpacity style={styles.pageBtn} onPress={loadMoreItems} disabled={loading || page === totalPages - 1}>
+              <View style={styles.buttonContent}>
+                <Icon name="chevron-right" size={20} color="black" />
+              </View>
+            </TouchableOpacity>
+          </View>
+
+        </ImageBackground>
       </View>
-  )}
+    )
+  }
   return null
 }
 
@@ -234,7 +295,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   activityIndicatorContainer: {
-    marginTop: 40,
+    alignContent: 'center',
+    marginTop: '90%'
   },
   stateText: {
     fontSize: 40,
@@ -242,26 +304,27 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: '60%'
   },
-  filterButton: {
+  sortButton: {
     position: 'absolute',
-    marginTop: 55,
+    marginTop: 64,
     borderRadius: 20,
     zIndex: 1,
     backgroundColor: 'rgba(255, 255, 255, 0.75)',
-    marginLeft: '55%',
-    width: 30,
+    marginLeft: '54%',
+    width: '13%',
     overflow: 'scroll',
   },
   search: {
-    marginTop: 50,
-    marginHorizontal: 20,
+    marginTop: 60,
+    marginLeft: 30,
+    marginRight: '48%',
     backgroundColor: 'rgba(255, 255, 255, 0.7)',
     borderRadius: 20,
   },
   inputContainer: {
     marginHorizontal: 5,
-    width: '53%',
-    padding: 15
+    width: '94%',
+    padding: 15,
   },
   imageBackground: {
     flex: 1,
@@ -270,22 +333,38 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
   },
   pageBtnContainer: {
-    display: 'flex',
-    justifyContent: 'space-between'
+    paddingHorizontal: 50,
+    marginBottom: 40,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+  buttonText: {
+    fontSize: 30,
+    fontFamily: 'Helvetica',
+    color: 'white',
+  },
+  pageBtn: {
+    padding: 20,
+    borderRadius: 100,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)'
+  },
+  buttonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   showMoreButton: {
-marginVertical: 10,
+    marginVertical: 10,
     padding: 10,
     backgroundColor: '#6F84C5',
     color: 'white',
     textAlign: 'center',
   },
   infoButton: {
-    // borderRadius: 100,
-    // width: 43,
-    // borderColor: 'white',
-    // borderWidth: 2,
-    // height: 
+    marginTop: 5,
+    borderTopColor: 'white',
+    borderTopWidth: 1,
   },
   card: {
     width: 335,
@@ -293,17 +372,14 @@ marginVertical: 10,
     marginHorizontal: 10,
     marginLeft: 27,
     marginRight: 27,
-    marginTop: 20,
-    marginBottom: 27,
-    // backgroundColor: 'rgba(78, 110, 129, 0.8)',
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    marginTop: 70,
+    marginBottom: '20%',
   },
   imageContainer: {
     width: '100%',
-    height: 0,
+    height: '80%',
     overflow: 'hidden',
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30
+    borderRadius: 30
   },
   image: {
     width: '100%',
@@ -311,23 +387,37 @@ marginVertical: 10,
     resizeMode: 'cover',
   },
   cardDetails: {
-    padding: 10,
+    padding: 20,
+    marginTop: 40,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    borderRadius: 30,
+    alignContent: 'center',
+    height: '20%'
   },
   cardContent: {
     marginBottom: 10,
   },
-  cardDescription: {
-    borderTopWidth: 1,
-    borderTopColor: '#ccc',
-    paddingTop: 10,
+  cardContentBubble: {
+    marginTop: -60,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    padding: 10,
   },
   text: {
     color: 'white',
     fontSize: 17,
     fontFamily: 'Helvetica',
-    textAlign: 'left',
+    textAlign: 'center',
     marginBottom: 5,
   },
-});
+  cardText2: {
+    color: 'black',
+    fontSize: 17,
+    fontFamily: 'Helvetica',
+    fontWeight: 'bold',
+    textAlign: 'center'
+  }
+})
 
 export default Home

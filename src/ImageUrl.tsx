@@ -5,7 +5,7 @@ type imageData = {
 }
 
 //the data itself in array
-const images: imageData[] = [
+const ImageUrl: imageData[] = [
     {
         id: "5e9d0d95eda69955f709d1eb",
         url: "https://upload.wikimedia.org/wikipedia/commons/c/c8/Falcon_1_Flight_4_liftoff.jpg"
@@ -24,4 +24,4 @@ const images: imageData[] = [
     }
 ]
 
-export default images
+export default ImageUrl
