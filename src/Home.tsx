@@ -341,7 +341,6 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: 30,
-    fontFamily: 'Helvetica',
     color: 'white',
   },
   pageBtn: {
@@ -407,14 +406,12 @@ const styles = StyleSheet.create({
   text: {
     color: 'white',
     fontSize: 17,
-    fontFamily: 'Helvetica',
     textAlign: 'center',
     marginBottom: 5,
   },
   cardText2: {
     color: 'black',
     fontSize: 17,
-    fontFamily: 'Helvetica',
     fontWeight: 'bold',
     textAlign: 'center'
   }

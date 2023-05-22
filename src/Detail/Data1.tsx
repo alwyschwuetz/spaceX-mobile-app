@@ -193,7 +193,6 @@ const styles = StyleSheet.create({
   text: {
     color: 'black',
     fontSize: 18,
-    fontFamily: 'Helvetica',
     textAlign: 'left',
     marginBottom: 5,
     lineHeight: 22
@@ -208,7 +207,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 30,
     textAlign: 'center',
-    fontFamily: 'Helvetica',
     color: 'black',
     padding: 20
   },
