@@ -28,11 +28,9 @@ type Rocket = {
 }
 
 //define 4 screen name
-type RootStackParamList = {
-  Data1: undefined,
-  Data4: undefined,
-  Data2: undefined,
-  Data3: undefined,
+export type RootStackParamList = {
+  Home: undefined,
+  Data1:  { rocketID: string },
 }
 
 //define query wanted
@@ -61,7 +59,7 @@ function Home() {
 
     //StackNavigationProp specifies navigation type
     //RootStackParamList is the screen type
-    const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'Data1' | 'Data2' | 'Data3' | 'Data4'>>()
+    const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'Data1' | 'Home'>>()
 
     //retrieve data 
     const { loading, error, data} = useQuery(GET_ROCKET)
@@ -196,18 +194,22 @@ function Home() {
     const RocketItem = ({ rocket }: RocketItemProps) => {
       // Verify id to img
       const imageId = ImageUrl.find((img) => img.id === rocket.id)
+
+      console.log(navigation)
+      console.log(rocket.id)
   
       // Filter the pages to navigate
       const onPressHandler = () => {
-        if (rocket.id === "5e9d0d95eda69955f709d1eb") {
-          navigation.navigate('Data1')
-        } else if (rocket.id === "5e9d0d95eda69973a809d1ec") {
-          navigation.navigate('Data2')
-        } else if (rocket.id === "5e9d0d95eda69974db09d1ed") {
-          navigation.navigate('Data3')
-        } else if (rocket.id === "5e9d0d96eda699382d09d1ee") {
-          navigation.navigate('Data4')
-        }
+        navigation.push('Data1', {rocketID: rocket.id})
+        // if (rocket.id === "5e9d0d95eda69955f709d1eb") {
+        //   navigation.push('Data1', {rocketID: rocket.id})
+        // } else if (rocket.id === "5e9d0d95eda69973a809d1ec") {
+        //   navigation.navigate('Data2')
+        // } else if (rocket.id === "5e9d0d95eda69974db09d1ed") {
+        //   navigation.navigate('Data3')
+        // } else if (rocket.id === "5e9d0d96eda699382d09d1ee") {
+        //   navigation.navigate('Data4')
+        // }
       }
     
       return (

@@ -6,7 +6,7 @@ import Onboarding from 'react-native-onboarding-swiper';
 import { useState, useEffect } from 'react';
 import { StyleSheet, ActivityIndicator} from 'react-native';
 import { Asset } from 'expo-asset';
-import Home from './src/Home';
+import Home, { RootStackParamList } from './src/Home';
 import Data1 from './src/Detail/Data1';
 import Data2 from './src/Detail/Data2';
 import Data3 from './src/Detail/Data3';
@@ -19,7 +19,8 @@ const client = new ApolloClient({
   cache: new InMemoryCache(),
 })
 
-const Stack = createNativeStackNavigator()
+const Stack = createNativeStackNavigator<RootStackParamList>()
+console.log(Stack)
 
 export default function App() {
   
@@ -75,9 +76,9 @@ export default function App() {
           <Stack.Navigator initialRouteName="Home" >
             <Stack.Screen name="Home" component={Home} options={{ headerShown: false }}/>
             <Stack.Screen name="Data1" component={Data1}  options={{ headerShown: false }}/>
-            <Stack.Screen name="Data2" component={Data2}  options={{ headerShown: false }}/>
+            {/* <Stack.Screen name="Data2" component={Data2}  options={{ headerShown: false }}/>
             <Stack.Screen name="Data3" component={Data3}  options={{ headerShown: false }}/>
-            <Stack.Screen name="Data4" component={Data4}  options={{ headerShown: false }}/>
+            <Stack.Screen name="Data4" component={Data4}  options={{ headerShown: false }}/> */}
           </Stack.Navigator>)}
 
         </NavigationContainer>

@@ -10,13 +10,19 @@ import {
   ImageBackground, 
   TouchableOpacity, 
   Linking } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { Asset } from 'expo-asset';
+import { RootStackParamList } from '../Home';
 
-type RootStackParamList = {
-    Home: undefined,
-  }
+type Data1Props = {
+  route: RouteProp<RootStackParamList, 'Data1'>;
+}
+
+// type RootStackParamList = {
+//     Home: undefined,
+//     Data1: {rocketID: string}
+//   }
 
 const GET_DETAILS = gql`
 query Rockets {
@@ -40,7 +46,10 @@ query Rockets {
   }
 }`
 
-function Data1() {
+function Data1({ route }: Data1Props) {
+
+  const { rocketID } = route.params
+  console.log(rocketID)
   //to use navigation
   const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'Home'>>()
 
@@ -106,7 +115,7 @@ function Data1() {
   if(data) {
 
     //using the first data in query
-    const newRocket = data.rockets[0]
+    const newRocket = data.rockets.find((rocket: { id: string }) => rocket.id === rocketID)
 
     return(
       <View style={styles.container}>
