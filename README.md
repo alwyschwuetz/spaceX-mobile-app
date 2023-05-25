@@ -1,4 +1,4 @@
-# SpaceX Mobile App
+# SpaceX Mobile App 🚀 👩🏻‍🚀 🌎
 
 Languages: React Native, Typescript and GraphQL (Apollo Client API)
 
